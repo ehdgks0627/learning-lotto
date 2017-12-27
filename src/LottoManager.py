@@ -11,7 +11,7 @@ class LottoManager:
         # setup logger
         self.logger = logging.getLogger("mylogger")
         self.logger.setLevel(log_level)
-        fomatter = logging.Formatter('%(levelname)s|%(filename)s:%(lineno)s > %(message)s')
+        fomatter = logging.Formatter('[%(levelname)-5s]%(filename)-15s:%(lineno)s | %(message)s')
         fileHandler = logging.FileHandler('./myLoggerTest.log')
         streamHandler = logging.StreamHandler()
         fileHandler.setFormatter(fomatter)
