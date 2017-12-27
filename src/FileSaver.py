@@ -6,9 +6,9 @@ class FileSaver:
         self.filename = filename
         self.log_level = log_level
 
-    def save_lotto_data(self, filename=None):
+    def save_lotto_data(self, lotto_list, filename=None):
         if not filename:
-            filename = self.filenaem
+            filename = self.filename
         f = open(filename, "wb")
         pickle.dump(lotto_list, f)
         f.close()
@@ -17,9 +17,11 @@ class FileSaver:
         if not filename:
             filename = self.filename
         if os.path.isfile(filename):
-            result = pickle.loads(filename)
+            f = open(filename, "rb")
+            result = pickle.load(f)
+            f.close()
             if self.log_level == "DEBUG":
-                print("lotto data(%s) is exist... loaded %d"%(filename, len(self.lotto_list)))
+                print("lotto data(%s) is exist... loaded %d"%(filename, len(result)))
         else:
             result = {}
             if self.log_level == "DEBUG":
