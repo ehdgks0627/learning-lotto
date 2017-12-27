@@ -1,23 +1,34 @@
 import requests
+import logging
+import logging.handlers
 from FileSaver import FileSaver
 
 class LottoManager:
     HTTP_OK = 200
-    log_level_list = ("DISABLE", "DEBUG")
-    __version__ = 0.1
+    __version__ = 0.2
 
-    def __init__(self, log_level="DISABLE"):
-        self.set_log_level(log_level)
-        self.saver = FileSaver(self.log_level)
+    def __init__(self, log_level=logging.INFO):
+        # setup logger
+        self.logger = logging.getLogger("mylogger")
+        self.logger.setLevel(log_level)
+        fomatter = logging.Formatter('%(levelname)s|%(filename)s:%(lineno)s > %(message)s')
+        fileHandler = logging.FileHandler('./myLoggerTest.log')
+        streamHandler = logging.StreamHandler()
+        fileHandler.setFormatter(fomatter)
+        streamHandler.setFormatter(fomatter)
+        self.logger.addHandler(fileHandler)
+        self.logger.addHandler(streamHandler)
+
+        self.saver = FileSaver(self.logger)
         self.lotto_data = self.saver.load_lotto_data()
 
     def get_lotto(self, drwNo):
+        ''' get lotto info from REST API '''
+
         url = "http://www.nlotto.co.kr/common.do?method=getLottoNumber&drwNo=%d"%(drwNo)
-        if self.log_level == "DEBUG":
-            print("[+] Request %s"%(url))
+        self.logger.debug("[+] Request %s"%(url))
         response = requests.get(url)
-        if self.log_level == "DEBUG":
-            print("[+] Response Status Code is %d"%(response.status_code))
+        self.logger.debug("[+] Response Status Code is %d"%(response.status_code))
         if response.status_code != self.HTTP_OK:
             return None
         else:
@@ -31,21 +42,19 @@ class LottoManager:
             return info
 
     def get_all_lotto(self):
+        ''' get all lotto info using get_lotto '''
+
         drwNo = 1
         while True:
-            info = self.get_lotto(drwNo)
-            if self.log_level == "DEBUG":
-                print("[*] Request %d Lotto Data"%(drwNo))
-            if info:
-                self.lotto_data[drwNo] = info
-            else:
-                break
+            if drwNo not in self.lotto_data:
+                info = self.get_lotto(drwNo)
+                self.logger.debug("[*] Request %d Lotto Data"%(drwNo))
+                if info:
+                    self.lotto_data[drwNo] = info
+                else:
+                    break
             drwNo += 1
-
-    def set_log_level(self, log_level):
-        if log_level not in self.log_level_list:
-            print("level must be ", self.log_level_list)
-        self.log_level = log_level
+        self.logger.info("[+] get %d data"%(drwNo))
 
     def save_lotto_data(self, filename = None):
         self.saver.save_lotto_data(self.lotto_data, filename)
