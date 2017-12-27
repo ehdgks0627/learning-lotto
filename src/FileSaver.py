@@ -2,9 +2,9 @@ import pickle
 import os
 
 class FileSaver:
-    def __init__(self, log_level, filename="lotto.data"):
+    def __init__(self, logger, filename="lotto.data"):
+        self.logger = logger
         self.filename = filename
-        self.log_level = log_level
 
     def save_lotto_data(self, lotto_list, filename=None):
         if not filename:
@@ -20,10 +20,8 @@ class FileSaver:
             f = open(filename, "rb")
             result = pickle.load(f)
             f.close()
-            if self.log_level == "DEBUG":
-                print("lotto data(%s) is exist... loaded %d"%(filename, len(result)))
+            self.logger.debug("[+] lotto data(%s) is exist... loaded %d"%(filename, len(result)))
         else:
             result = {}
-            if self.log_level == "DEBUG":
-                print("lotto data(%s) is not exist"%(filename))
+            self.logger.debug("[-] lotto data(%s) is not exist"%(filename))
         return result
